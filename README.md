@@ -79,3 +79,4 @@ curl "http://localhost:3000/api/products/analytics/top-brands?by=price&limit=5"
 - Keep `.env` out of version control. Use `.env.example` for classmates/instructors.
 - `npm run bootstrap` can be re-run safely; it updates validation and ensures indexes.
 - This repo keeps code minimal, secure, and professional: body size limits, error handlers, and no secrets committed.
+# fashion-db-api
