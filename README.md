@@ -1,82 +1,130 @@
-# Fashion Database API (SBA 319)
+# 🪩 Fashion Database API
 
-MongoDB + Node + Express backend demonstrating CRUD, validation, indexes, and an aggregation for a simple fashion catalog.
+**Project:** SBA 319  
+**Built with:** MongoDB + Node.js + Express  
 
-## Quick Start
+This is my backend project for a the fashion database application.  
+It lets you create, read, update, and delete (CRUD) products and stores, and includes some basic data validation, indexing, and one aggregation example for analytics. I was motivated to complete this project because I would love to segway into fashion 🥳
 
+---
+
+## 🚀 How I Built It
+I wanted to practice connecting a real MongoDB database to a Node + Express app.  
+The main goal was to understand how data flows between the server and the database, how to validate it, and how to make queries faster using indexes.
+
+Here’s the order I built everything:
+1. Set up the `index.mjs` file to run an Express server and connect to MongoDB.
+2. Created routes for products, stores, and drops.
+3. Added validation using JSON schema so data would stay clean.
+4. Added compound indexes to help with searching and filtering.
+
+
+---
+
+## 🧠 What I Learned
+- How to organize backend routes for different resources (products, stores, drops).
+- How to use MongoDB’s validation and indexing features.
+- How to write GET, POST, PATCH, and DELETE endpoints safely.
+- How to test APIs and read server logs for errors.
+- How to structure `.env` files securely.
+
+---
+
+## 💻 Quick Start for anyone 
 ```bash
-cp .env.example .env
-# fill in MONGODB_URI and DB_NAME
+cp .env.example .env     # fill in MONGODB_URI and DB_NAME
 npm install
-npm run bootstrap   # sets validation & indexes
-npm run seed        # inserts demo data (optional)
-npm run dev         # start server
-# visit: http://localhost:3000/health
+npm run bootstrap        # creates validation & indexes
+npm run seed             # optional demo data
+npm run dev              # start the server
+
+# visit:
+http://localhost:3000/health
 ```
 
-## Routes
+---
+
+## 📍 Routes Overview
 
 ### Health
-- `GET /health` → `{ ok: true }`
+`GET /health` → `{ ok: true }`
 
-### Products (CRUD + Query + Aggregation)
-- `POST /api/products` — create
-- `GET /api/products` — list, supports filters
-  - `brand=<string>`
-  - `minPrice=<number>`
-  - `maxPrice=<number>`
-  - `q=<text>` (full‑text search on `name` + `brand`)
-  - `limit`, `page`
-- `GET /api/products/:id` — read by id
-- `PATCH /api/products/:id` — partial update
-- `DELETE /api/products/:id` — delete
-- `GET /api/products/analytics/top-brands?by=price|rating&limit=5` — aggregation
+---
 
-### Stores (CRUD: minimal)
-- `POST /api/stores`
-- `GET /api/stores`
-- `GET /api/stores/:id`
-- `PATCH /api/stores/:id`
-- `DELETE /api/stores/:id`
+### Products
+| Method | Route | Description |
 
-### Drops (tiny demo)
-- `POST /api/drops`
-- `GET /api/drops`
+| POST | `/api/products` | Create a new product |
+| GET | `/api/products` | List all products or filter by brand, price, or search |
+| GET | `/api/products/:id` | Read one product by ID |
+| PATCH | `/api/products/:id` | Update a product |
+| DELETE | `/api/products/:id` | Delete a product |
+| GET | `/api/products/analytics/top-brands` | Get top brands by price or rating |
 
-## Validation (JSON Schema)
+**Query options:**  
+`brand=`, `minPrice=`, `maxPrice=`, `q=` (for text search), `limit=`, `page=`
 
-- `products` requires: `brand (string)`, `name (string)`, `price (double >= 0)`, `categories (array[string] >=1)`, `storeId (objectId)`.
-- `rating` is an object with `avg (0..5 double)`, `count (int >= 0)`; defaults to `{avg:0,count:0}` on create.
-- `stores` requires `name`, optional `neighborhood`, `tags[]`, and optional GeoJSON `location` (`Point [lng, lat]`).
+---
 
-## Indexes
-
-- `products`: `{ brand: 1, price: 1 }` — efficient filtering & sorting by brand/price; enables potential covered queries when projecting indexed fields only.
-- `products`: text index on `{ name, brand }` — supports `q` full‑text search.
-- `stores`: `{ name: 1 }` — quick lookups.
-- `stores`: `{ location: "2dsphere" }` — ready for geo queries later.
-
-## Example cURL
-
-```bash
-# Create store
-curl -X POST http://localhost:3000/api/stores  -H "Content-Type: application/json"  -d '{"name":"SoHo Boutique","neighborhood":"SoHo","tags":["streetwear","upscale"]}'
-
-# Create product (replace <STORE_ID>)
-curl -X POST http://localhost:3000/api/products  -H "Content-Type: application/json"  -d '{"brand":"AMI","name":"Red Wool Coat","price":599.99,"categories":["outerwear","women"],"storeId":"<STORE_ID>","rating":{"avg":4.8,"count":17}}'
-
-# Filtered list (uses compound index)
-curl "http://localhost:3000/api/products?brand=AMI&minPrice=100&maxPrice=800&limit=10&page=1"
-
-# Full-text search
-curl "http://localhost:3000/api/products?q=red+coat"
-
-# Aggregation
-curl "http://localhost:3000/api/products/analytics/top-brands?by=price&limit=5"
+### Stores
+Basic CRUD:
+```
+POST /api/stores
+GET /api/stores
+GET /api/stores/:id
+PATCH /api/stores/:id
+DELETE /api/stores/:id
 ```
 
-## Notes
-- Keep `.env` out of version control. Use `.env.example` for classmates/instructors.
-- `npm run bootstrap` can be re-run safely; it updates validation and ensures indexes.
-- This repo keeps code minimal, secure, and professional: body size limits, error handlers, and no secrets committed.
-# fashion-db-api
+---
+
+### Drops (demo)
+```
+POST /api/drops
+GET /api/drops
+```
+
+---
+
+## 🧩 Validation Rules
+**Products**
+- Must include: `brand`, `name`, `price`, `categories`, `storeId`
+- Rating defaults to `{ avg: 0, count: 0 }`
+- Price must be `>= 0`
+
+**Stores**
+- Must include: `name`
+- Optional: `neighborhood`, `tags`, or GeoJSON `location`
+
+---
+
+## ⚡ Indexes
+- `products: { brand: 1, price: 1 }` → filters/sorts faster  
+- `products: { name, brand }` (text) → full-text search  
+- `stores: { name: 1 }` → quick lookups  
+- `stores: { location: "2dsphere" }` → ready for future geo queries  
+
+---
+
+## 🧪 Example Requests
+```bash
+# Create store
+curl -X POST http://localhost:3000/api/stores \
+  -H "Content-Type: application/json" \
+  -d '{"name":"SoHo Boutique","neighborhood":"SoHo","tags":["streetwear","upscale"]}'
+
+# Create product (replace <STORE_ID>)
+curl -X POST http://localhost:3000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"brand":"AMI","name":"Red Wool Coat","price":599.99,"categories":["outerwear","women"],"storeId":"<STORE_ID>"}'
+```
+
+---
+
+
+
+
+## ✨ About This Project
+This project helped me understand backend data structure and security better.  
+It’s a solid base for building a fashion store inventory or API that connects to a frontend later on.
+Fashion companies please hire me 
